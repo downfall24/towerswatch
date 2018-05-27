@@ -1,0 +1,13 @@
+{
+  "name": "towerswatch",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "author": "Downfall24",
+  "dependencies": {
+    "cheerio": "latest",
+    "express": "latest",
+    "mysql": "^2.15.0",
+    "request": "latest"
+  }
+}
