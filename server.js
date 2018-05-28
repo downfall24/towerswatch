@@ -19,49 +19,51 @@ app.get('/gettimes', function(req, res){
     
     connection.connect();
     
-    url = 'http://ridetimes.co.uk/';
+    urls = ['http://ridetimes.co.uk/?group=Thrill', 'http://ridetimes.co.uk/?group=Family'];
 
-    request(url, function(error, response, html){
+    urls.forEach(function(url) {
 
-        if(!error){
+        request(url, function(error, response, html){
 
-            var $ = cheerio.load(html);
+            if(!error){
+    
+                var $ = cheerio.load(html);
+    
+                $('.ride-cell').filter(function(){
+                    var data = $(this);
+                    
+                    var ridename = data.text();
+                    var queuetime = data.next('.time-cell').children('span').text();
+    
+                    connection.query('SELECT rideid, name FROM rides WHERE name = ?', [ridename], function (error, results, fields) {
+                        if (error) throw error;
+    
+                        // CHECK RIDE IS IN DB
+                        if(results.length == 0) {
+                            console.log("== ADDING RIDE: " + ridename + " ==");
+                            connection.query('INSERT INTO rides (name) VALUES (?)', [ridename], function (error, results, fields) {
+                                if (error) throw error;
+                                //console.log(results);
+                            });
+                        } else {
+                            // RECORD QUEUE TIME
+    
+                            console.log(ridename + " - " + queuetime);
+                            connection.query('INSERT INTO queuetime (rideid, queuetime) VALUES (?, ?)', [results[0].rideid, queuetime], function (error, results, fields) {
+                                if (error) throw error;
+                            });
+    
+                        }
+    
+                      });
+                  
+                })
+            }
 
-            $('.ride-cell').filter(function(){
-                var data = $(this);
-                
-                var ridename = data.html();
-                var queuetime = data.next('.time-cell').children('span').html();
+        })
+    });
+    res.status(200).json({err:false,data:"Queue times updated."});
 
-                connection.query('SELECT rideid, name FROM rides WHERE name = ?', [ridename], function (error, results, fields) {
-                    if (error) throw error;
-
-                    // CHECK RIDE IS IN DB
-                    if(results.length == 0) {
-                        connection.query('INSERT INTO rides (name) VALUES (?)', [ridename], function (error, results, fields) {
-                            if (error) throw error;
-                            console.log(results);
-                        });
-                    } else {
-                        // RECORD QUEUE TIME
-
-                        console.log(ridename + " - " + queuetime);
-                        connection.query('INSERT INTO queuetime (rideid, queuetime) VALUES (?, ?)', [results[0].rideid, queuetime], function (error, results, fields) {
-                            if (error) throw error;
-                        });
-
-                    }
-
-
-
-                  });
-              
-            })
-        }
-
-        res.status(200).json({err:false,data:"Queue times updated."});
-
-    })
 })
 
 // Bootstrap routes
