@@ -1,8 +1,10 @@
-var express = require('express');
-var fs = require('fs');
-var request = require('request');
-var cheerio = require('cheerio');
-var app     = express();
+var express = require('express'),
+fs = require('fs'),
+request = require('request'),
+cheerio = require('cheerio'),
+fs = require('fs'),
+path = require('path'),
+app     = express();
 
 
 app.get('/gettimes', function(req, res){
@@ -58,6 +60,12 @@ app.get('/gettimes', function(req, res){
         }
     })
 })
+
+// Bootstrap routes
+var routesPath = path.join(__dirname, 'routes');
+fs.readdirSync(routesPath).forEach(function(file) {
+  app.use(express.static(__dirname + '/public'));
+});
 
 app.listen('8081')
 console.log('Awaiting connections on 8081');
