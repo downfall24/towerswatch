@@ -7,17 +7,34 @@ path = require('path'),
 app     = express();
 
 
+var mysql      = require('mysql');
+var connection = mysql.createConnection({
+  host     : process.env.DATABASE_HOST,
+  user     : process.env.DATABASE_USER,
+  password : process.env.DATABASE_PASSWORD,
+  database : process.env.DATABASE_NAME
+});  
+
+app.get('/getdata', function(req, res) {
+
+    connection.connect();
+
+    connection.query('SELECT r.name, q.queuetime, DATE_FORMAT(createdon, "%H:%i") AS "time"  FROM queuetime q, rides r WHERE q.rideid = r.rideid AND DATE(createdon) = CURDATE()', function (error, results, fields) {
+        if (error) throw error;
+
+        res.status(200).json({err:false,data:results});
+
+    });
+
+    connection.end();
+
+})
+
 app.get('/gettimes', function(req, res){
 
-    var mysql      = require('mysql');
-    var connection = mysql.createConnection({
-      host     : process.env.DATABASE_HOST,
-      user     : process.env.DATABASE_USER,
-      password : process.env.DATABASE_PASSWORD,
-      database : process.env.DATABASE_NAME
-    });  
+
     
-    connection.connect();
+
     
     urls = ['http://ridetimes.co.uk/?group=Thrill', 'http://ridetimes.co.uk/?group=Family'];
 
@@ -28,6 +45,8 @@ app.get('/gettimes', function(req, res){
             if(!error){
     
                 var $ = cheerio.load(html);
+
+                connection.connect();
     
                 $('.ride-cell').filter(function(){
                     var data = $(this);
@@ -48,7 +67,7 @@ app.get('/gettimes', function(req, res){
                         } else {
                             // RECORD QUEUE TIME
     
-                            console.log(ridename + " - " + queuetime);
+                            console.log(new Date().toLocaleString() + " - " + ridename + " - " + queuetime);
                             connection.query('INSERT INTO queuetime (rideid, queuetime) VALUES (?, ?)', [results[0].rideid, queuetime], function (error, results, fields) {
                                 if (error) throw error;
                             });
@@ -58,6 +77,9 @@ app.get('/gettimes', function(req, res){
                       });
                   
                 })
+
+                connection.end();
+
             }
 
         })
