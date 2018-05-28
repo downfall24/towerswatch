@@ -33,7 +33,7 @@ app.get('/getdata', function(req, res) {
 app.get('/gettimes', function(req, res){
 
 
-    
+    connection.connect();
 
     
     urls = ['http://ridetimes.co.uk/?group=Thrill', 'http://ridetimes.co.uk/?group=Family'];
@@ -81,6 +81,13 @@ app.get('/gettimes', function(req, res){
 
         })
     });
+
+
+
+    setTimeout(function(){
+        connection.end();
+    },25000);
+
     res.status(200).json({err:false,data:"Queue times updated."});
 
 })
