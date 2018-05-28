@@ -58,6 +58,9 @@ app.get('/gettimes', function(req, res){
               
             })
         }
+
+        res.status(200).json({err:false,data:"Queue times updated."});
+
     })
 })
 
