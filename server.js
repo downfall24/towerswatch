@@ -46,8 +46,6 @@ app.get('/gettimes', function(req, res){
     
                 var $ = cheerio.load(html);
 
-                connection.connect();
-    
                 $('.ride-cell').filter(function(){
                     var data = $(this);
                     
@@ -78,7 +76,6 @@ app.get('/gettimes', function(req, res){
                   
                 })
 
-                connection.end();
 
             }
 
