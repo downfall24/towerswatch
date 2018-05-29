@@ -8,9 +8,10 @@ app     = express();
 
 
 var mysql      = require('mysql');
-var connection = mysql.createConnection({
+var pool = mysql.createPool({
   host     : process.env.DATABASE_HOST,
   user     : process.env.DATABASE_USER,
+  port     : process.env.DATABASE_PORT,
   password : process.env.DATABASE_PASSWORD,
   database : process.env.DATABASE_NAME
 });  
@@ -32,9 +33,6 @@ app.get('/getdata', function(req, res) {
 
 app.get('/gettimes', function(req, res){
 
-
-    connection.connect();
-
     var counter = 0;
     
     urls = ['http://ridetimes.co.uk/?group=Thrill', 'http://ridetimes.co.uk/?group=Family'];
@@ -55,13 +53,13 @@ app.get('/gettimes', function(req, res){
 
                     counter++;
     
-                    connection.query('SELECT rideid, name FROM rides WHERE name = ?', [ridename], function (error, results, fields) {
+                    pool.query('SELECT rideid, name FROM rides WHERE name = ?', [ridename], function (error, results, fields) {
                         if (error) throw error;
     
                         // CHECK RIDE IS IN DB
                         if(results.length == 0) {
                             console.log("== ADDING RIDE: " + ridename + " ==");
-                            connection.query('INSERT INTO rides (name) VALUES (?)', [ridename], function (error, results, fields) {
+                            pool.query('INSERT INTO rides (name) VALUES (?)', [ridename], function (error, results, fields) {
                                 if (error) throw error;
                                 //console.log(results);
                             });
@@ -69,7 +67,7 @@ app.get('/gettimes', function(req, res){
                             // RECORD QUEUE TIME
     
                             //console.log(new Date().toLocaleString() + " - " + ridename + " - " + queuetime);
-                            connection.query('INSERT INTO queuetime (rideid, queuetime) VALUES (?, ?)', [results[0].rideid, queuetime], function (error, results, fields) {
+                            pool.query('INSERT INTO queuetime (rideid, queuetime) VALUES (?, ?)', [results[0].rideid, queuetime], function (error, results, fields) {
                                 if (error) throw error;
                             });
     
@@ -85,15 +83,10 @@ app.get('/gettimes', function(req, res){
         })
     });
 
-
-
     setTimeout(function(){
-        connection.end();
         console.log(new Date().toLocaleString() + " - " + counter + " ride times updated");
         res.status(200).json({err:false,data:"Queue times updated."});
-    },25000);
-
-
+    },5000);
 
 })
 
@@ -104,5 +97,5 @@ fs.readdirSync(routesPath).forEach(function(file) {
 });
 
 app.listen('8081')
-console.log('Awaiting connections on 8081');
+console.log('Awaiting connections on 8081 - Database: ' + process.env.DATABASE_HOST);
 exports = module.exports = app;
