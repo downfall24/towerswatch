@@ -35,6 +35,7 @@ app.get('/gettimes', function(req, res){
 
     connection.connect();
 
+    var counter = 0;
     
     urls = ['http://ridetimes.co.uk/?group=Thrill', 'http://ridetimes.co.uk/?group=Family'];
 
@@ -51,6 +52,8 @@ app.get('/gettimes', function(req, res){
                     
                     var ridename = data.text();
                     var queuetime = data.next('.time-cell').children('span').text();
+
+                    counter++;
     
                     connection.query('SELECT rideid, name FROM rides WHERE name = ?', [ridename], function (error, results, fields) {
                         if (error) throw error;
@@ -65,7 +68,7 @@ app.get('/gettimes', function(req, res){
                         } else {
                             // RECORD QUEUE TIME
     
-                            console.log(new Date().toLocaleString() + " - " + ridename + " - " + queuetime);
+                            //console.log(new Date().toLocaleString() + " - " + ridename + " - " + queuetime);
                             connection.query('INSERT INTO queuetime (rideid, queuetime) VALUES (?, ?)', [results[0].rideid, queuetime], function (error, results, fields) {
                                 if (error) throw error;
                             });
@@ -88,6 +91,7 @@ app.get('/gettimes', function(req, res){
         connection.end();
     },25000);
 
+    console.log(new Date().toLocaleString() + " - " + counter + " ride times updated");
     res.status(200).json({err:false,data:"Queue times updated."});
 
 })
