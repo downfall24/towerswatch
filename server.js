@@ -89,10 +89,11 @@ app.get('/gettimes', function(req, res){
 
     setTimeout(function(){
         connection.end();
+        console.log(new Date().toLocaleString() + " - " + counter + " ride times updated");
+        res.status(200).json({err:false,data:"Queue times updated."});
     },25000);
 
-    console.log(new Date().toLocaleString() + " - " + counter + " ride times updated");
-    res.status(200).json({err:false,data:"Queue times updated."});
+
 
 })
 
