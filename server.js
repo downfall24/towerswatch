@@ -46,6 +46,7 @@ app.get('/gettimes', function(req, res){
                     var ridename = data.text();
                     var queuetime = data.next('.time-cell').children('span').text().toLowerCase;
 
+                    console.log(queuetime);
                     counter++;
     
                     pool.query('SELECT rideid, name FROM rides WHERE name = ?', [ridename], function (error, results, fields) {
