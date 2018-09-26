@@ -44,7 +44,7 @@ app.get('/gettimes', function(req, res){
                     var data = $(this);
                     
                     var ridename = data.text();
-                    var queuetime = data.next('.time-cell').children('span').text().toLowerCase;
+                    var queuetime = data.next('.time-cell').children('span').text().toLowerCase();
 
                     console.log(queuetime);
                     counter++;
