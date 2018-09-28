@@ -6,6 +6,7 @@
   "author": "Downfall24",
   "dependencies": {
     "cheerio": "latest",
+    "dotenv": "^6.0.0",
     "express": "latest",
     "mysql": "^2.15.0",
     "request": "latest"

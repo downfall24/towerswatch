@@ -63,3 +63,5 @@ typings/
 
 test.txt
 ecosystem.config.js
+
+.env

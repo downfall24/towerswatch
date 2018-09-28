@@ -6,6 +6,7 @@ fs = require('fs'),
 path = require('path'),
 app = express();
 
+require('dotenv').config();
 
 var mysql = require('mysql'),
 pool = mysql.createPool({
